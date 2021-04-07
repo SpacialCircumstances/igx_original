@@ -14,3 +14,32 @@ sourceSets {
 dependencies {
     compile fileTree(dir: "${projectDir}/lib", includes: ['*.jar'])
 }
+
+jar {
+    manifest {
+        // Make sure the app's jar can be used with a simple -cp
+        attributes 'Class-Path': configurations.runtime.collect { "${it.getName()}" }.join(' ')
+    }
+}
+
+task serverStartScript(type: CreateStartScripts) {
+    applicationName = 'server'
+    mainClassName = 'igx.server.Server'
+    outputDir = file("$buildDir/bin")
+    classpath = jar.outputs.files
+}
+
+task clientStartScript(type: CreateStartScripts) {
+    applicationName = 'client'
+    mainClassName = 'igx.client.I'
+    outputDir = file("$buildDir/bin")
+    classpath = jar.outputs.files
+}
+
+applicationDistribution.from(serverStartScript) {
+    into 'bin'
+}
+
+applicationDistribution.from(clientStartScript) {
+    into 'bin'
+}
